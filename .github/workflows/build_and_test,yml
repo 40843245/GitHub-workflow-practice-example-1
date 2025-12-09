@@ -1,0 +1,43 @@
+name: C# CI - Build and Test
+
+on:
+  # 觸發條件：當代碼被推送到 'main' 分支時
+  push:
+    branches: [ main ]
+  # 觸發條件：當有人對 'main' 分支提交 Pull Request 時
+  pull_request:
+    branches: [ main ]
+  # 允許從 GitHub 介面手動運行
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    # 運行器環境：使用最新的 Windows 虛擬機，這是 C# 專案的常見選擇
+    runs-on: windows-latest
+    
+    steps:
+      # Step 1: 檢出儲存庫代碼
+      - name: Checkout Repository Code
+        uses: actions/checkout@v4
+      
+      # Step 2: 設定 .NET SDK 環境
+      - name: Setup .NET Environment (8.0)
+        uses: actions/setup-dotnet@v4
+        with:
+          # 指定 .NET SDK 版本，請根據您的專案需求調整
+          dotnet-version: '8.0.x' 
+          
+      # Step 3: 還原 NuGet 依賴套件
+      - name: Restore Dependencies
+        # 執行 dotnet restore 命令
+        run: dotnet restore
+      
+      # Step 4: 建置專案（使用 Release 配置）
+      - name: Build Project
+        # 使用 --no-restore 旗標，避免重複還原
+        run: dotnet build --configuration Release --no-restore
+        
+      # Step 5: 執行單元測試
+      - name: Run Unit Tests
+        # 使用 --no-build 旗標，只運行已建置的程式碼
+        run: dotnet test --configuration Release --no-build --verbosity normal
