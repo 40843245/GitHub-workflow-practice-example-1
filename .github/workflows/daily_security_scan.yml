@@ -1,0 +1,32 @@
+name: Daily Dependency Security Check
+
+on:
+  # 觸發條件：使用 cron 語法，設定在每天 UTC 時間 00:00 執行
+  schedule:
+    - cron: '0 0 * * *'
+  # 允許手動執行
+  workflow_dispatch:
+
+jobs:
+  check_dependencies:
+    runs-on: ubuntu-latest # 安全掃描通常可以在 Linux 環境下執行
+
+    steps:
+      # Step 1: 檢出儲存庫代碼
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      # Step 2: 設定 .NET SDK 環境
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      # Step 3: 使用 .NET 命令檢查 Nuget 套件的漏洞
+      # 這是一個示範，您可以整合更進階的第三方安全 Action (如 Snyk 或 Dependabot)
+      - name: Run .NET Vulnerability Check
+        # 使用 dotnet list package --vulnerable 命令來查找已知漏洞
+        run: |
+          echo "Scanning for known NuGet vulnerabilities..."
+          dotnet list package --vulnerable
+          # 如果發現漏洞，可以選擇讓 Workflow 失敗 (例如：使用 exit 1)
